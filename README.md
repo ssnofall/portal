@@ -53,8 +53,8 @@ touch .env
 4. Configure your '.env' file. Replace the 'HOST' value with your machine's local IP address:
 ```bash
 NODE_ENV=development
-WEB_PORT=8080
-SIGNALING_PORT=3000
+WEB_PORT=3000
+SIGNALING_PORT=3001
 HOST=192.168.1.100
 USE_SSL=true
 ```
