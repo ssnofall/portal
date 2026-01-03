@@ -1,6 +1,6 @@
 # Portal
 
-**Portak is a peer-to-peer video chat web application built with WebRTC and JavaScript.**
+**Portal is a peer-to-peer video chat web application built with WebRTC and JavaScript.**
 
 [![Project Status](https://img.shields.io/badge/status-in_progress-yellow)](https://github.com/ssnofall/peer-chat)
 [![Node.js](https://img.shields.io/badge/Node.js-required-green?logo=node.js)](https://nodejs.org/)
