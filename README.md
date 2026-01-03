@@ -2,7 +2,7 @@
 
 **Portal is a peer-to-peer video chat web application built with WebRTC and JavaScript.**
 
-[![JavaScript](https://img.shields.io/badge/-javascript-gray?logo=javascript)](https://github.com/ssnofall/portal)
+[![JavaScript](https://img.shields.io/badge/-JavaScript-gray?logo=javascript)](https://github.com/ssnofall/portal)
 [![Project Status](https://img.shields.io/badge/status-in_progress-yellow)](https://github.com/ssnofall/portal)
 [![Node.js](https://img.shields.io/badge/Node.js-required-green?logo=node.js)](https://nodejs.org/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
