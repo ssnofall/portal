@@ -264,7 +264,7 @@ async function handleAnswer(answer) {
   try {
     // Set the answer as remote description
     await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
-    setStatus('✓ Call accepted, connecting...');
+    setStatus('Call accepted, connecting...');
   } catch (error) {
     console.error('Error handling answer:', error);
   }

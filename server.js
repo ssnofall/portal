@@ -4,12 +4,23 @@ const https = require('https');
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 const PORT = process.env.WEB_PORT || 3000;
 const SIGNALING_PORT = process.env.SIGNALING_PORT || 3001;
 const HOST = process.env.HOST || 'localhost';
 const USE_SSL = process.env.USE_SSL === 'true';
+
+// Set up rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: "Too many requests from this IP, please try again later.",
+});
+
+// Apply rate limiting to all requests
+app.use(limiter);
 
 // Determine protocol for WebSocket
 const WS_PROTOCOL = USE_SSL ? 'wss' : 'ws';
