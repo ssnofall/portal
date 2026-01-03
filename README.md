@@ -1,12 +1,13 @@
 # Portal
 
-<img src="img.png" alt="Portal Preview" width="800"/>
-
 **Portal is a peer-to-peer video chat web application built with WebRTC and JavaScript.**
 
 [![Project Status](https://img.shields.io/badge/status-in_progress-yellow)](https://github.com/ssnofall/peer-chat)
 [![Node.js](https://img.shields.io/badge/Node.js-required-green?logo=node.js)](https://nodejs.org/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
+<img src="img.png" alt="Portal Preview" width="800"/>
+
 
 Portal enables direct audio and video communication between browsers using WebRTC, with a lightweight signaling server to facilitate peer discovery.
 
