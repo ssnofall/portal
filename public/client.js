@@ -219,7 +219,7 @@ async function makeCall(peerId) {
 
 // Handle incoming call (you're the receiver)
 async function handleOffer(peerId, offer) {
-  setStatus('📞 Incoming call from ' + peerId);
+  setStatus('Incoming call from ' + peerId);
   console.log('Received offer from:', peerId);
   
   // Close existing connection if any
