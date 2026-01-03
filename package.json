@@ -1,0 +1,23 @@
+{
+  "name": "portal",
+  "version": "1.0.0",
+  "description": "WebRTC P2P Video Chat",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "dev:signal": "node signaling.js",
+    "dev:all": "concurrently \"npm run dev\" \"npm run dev:signal\"",
+    "start": "node server.js"
+  },
+  "keywords": ["webrtc", "video", "chat", "P2P"],
+  "author": "Snofall",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "ws": "^8.14.2"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

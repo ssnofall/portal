@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Portal</h1>
+    
+    <!-- Connection Info Section -->
+    <div class="info">
+      <p><span style="color:#ffffffa6;">Your Portal ID:</span> <strong id="myId">Loading...</strong></p>
+      <input type="text" id="peerId" placeholder="Peer ID:">
+      <button id="callBtn">Connect</button>
+    </div>
+    
+    <!-- Video Display Section -->
+    <div class="videos">
+      <div class="video-container">
+        <h3>Your Video</h3>
+        <video id="localVideo" autoplay muted playsinline></video>
+      </div>
+      
+      <div class="video-container">
+        <h3>Remote Video</h3>
+        <video id="remoteVideo" autoplay playsinline></video>
+      </div>
+    </div>
+    
+    <!-- Status Display -->
+    <div class="status" id="status">Connecting...</div>
+  </div>
+  
+  <script src="/config.js"></script>
+  <script src="client.js"></script>
+</body>
+</html>
