@@ -1,5 +1,7 @@
 # Portal
 
+<img src="img.png" alt="Portal Preview" width="800"/>
+
 **Portal is a peer-to-peer video chat web application built with WebRTC and JavaScript.**
 
 [![Project Status](https://img.shields.io/badge/status-in_progress-yellow)](https://github.com/ssnofall/peer-chat)
