@@ -1,6 +1,17 @@
 
-// Generate a unique random ID for this user
-const myId = 'peer_' + Math.random().toString(36).substring(2, 11);
+// PUBLIC/CLIENT.JS
+
+// Generate a random peer ID
+function generatePeerId(length = 10) {
+  const array = new Uint8Array(length);          // make an array of bytes
+  crypto.getRandomValues(array);                 // fill it with random numbers
+  return 'peer_' + Array.from(array, byte => byte.toString(36).padStart(2, '0'))
+                         .join('')
+                         .substring(0, length); // shorten to the length we want
+}
+
+const myId = generatePeerId();
+console.log('Your Portal ID:', myId);
 document.getElementById('myId').textContent = myId;
 
 // Get signaling server URL from config

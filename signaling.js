@@ -11,6 +11,8 @@ const USE_SSL = process.env.USE_SSL === 'true';
 let server;
 let wss;
 
+
+
 if (USE_SSL) {
   // Create HTTPS server for WebSocket
   const keyPath = path.join(__dirname, 'certs', 'server.key');
@@ -50,11 +52,33 @@ wss.on('connection', (ws, req) => {
       const data = JSON.parse(message);
       
       switch(data.type) {
-        case 'register':
-          clientId = data.clientId;
-          clients.set(clientId, ws);
-          console.log(`Client registered: ${clientId} (Total: ${clients.size})`);
-          break;
+      case 'register':
+        // Step 1: Use client-provided ID or generate a secure one
+        clientId = data.clientId || generatePeerId();
+
+        // Step 2: Check for duplicate
+        if (clients.has(clientId)) {
+          console.warn(`Duplicate client ID attempted: ${clientId}`);
+          ws.send(JSON.stringify({
+            type: 'register-failed',
+            reason: 'ID already in use. Please generate a new one.'
+          }));
+          clientId = null; // prevent storing duplicate
+          return;
+        }
+
+        // Step 3: Store client
+        clients.set(clientId, ws);
+
+        // Step 4: Send success to client
+        ws.send(JSON.stringify({
+          type: 'register-success',
+          clientId
+        }));
+
+        console.log(`Client registered: ${clientId} (Total: ${clients.size})`);
+        break;
+
           
         case 'offer':
         case 'answer':
@@ -78,16 +102,31 @@ wss.on('connection', (ws, req) => {
   });
   
   ws.on('close', () => {
-    if (clientId) {
-      clients.delete(clientId);
-      console.log(`Client disconnected: ${clientId} (Total: ${clients.size})`);
-    }
-  });
-  
-  ws.on('error', (error) => {
-    console.error('WebSocket error:', error);
-  });
+  if (clientId) {
+    clients.delete(clientId);
+    console.log(`Client disconnected: ${clientId} (Total: ${clients.size})`);
+  }
 });
+});
+
+// Fallback Generate a random peer ID
+function generatePeerId(length = 10) {
+  const array = new Uint8Array(length);          // make an array of bytes
+  crypto.getRandomValues(array);                 // fill it with random numbers
+  return 'peer_' + Array.from(array, byte => byte.toString(36).padStart(2, '0'))
+                         .join('')
+                         .substring(0, length); // shorten to the length we want
+}
+
+// Auto generate new id if duplicate found
+function registerWithServer() {
+  const myId = generatePeerId(); // secure random ID
+  ws.send(JSON.stringify({
+    type: 'register',
+    clientId: myId
+  }));
+}
+
 
 // Start the server
 server.listen(PORT, '0.0.0.0', () => {
