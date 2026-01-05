@@ -121,12 +121,13 @@ function VideoChat() {
   const handleCall = async () => {
     const peerId = peerIdInput.trim();
     if (!peerId) {
-      alert('Enter a peer ID');
+      alert('Enter a Portal ID');
       return;
     }
     if (peerId === myId) {
       alert('Cannot call yourself');
       return;
+
     }
 
     if (!localStream) {
@@ -181,7 +182,7 @@ function VideoChat() {
             type="text"
             value={peerIdInput}
             onChange={(e) => setPeerIdInput(e.target.value)}
-            placeholder="Enter Peer ID"
+            placeholder="Enter Portal ID"
             onKeyPress={(e) => e.key === 'Enter' && handleCall()}
           />
           <button onClick={handleCall} disabled={!localStream}>
