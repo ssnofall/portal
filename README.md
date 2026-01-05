@@ -6,7 +6,6 @@
 [![Node.js](https://img.shields.io/badge/Node.Js-gray?logo=node.js)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-gray?logo=react&logoColor=61DAFB)](https://react.dev/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![Project Status](https://img.shields.io/badge/Status-in_progress-yellow)](https://github.com/ssnofall/portal)
 
 <img src="img.png" alt="Portal Preview" width="800"/>
 
