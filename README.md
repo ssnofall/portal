@@ -3,9 +3,9 @@
 **Portal is a peer-to-peer video chat web application built with WebRTC and JavaScript.**
 
 [![JavaScript](https://img.shields.io/badge/-JavaScript-gray?logo=javascript)](https://github.com/ssnofall/portal)
-[![Node.js](https://img.shields.io/badge/Node.js-required-green?logo=node.js)](https://nodejs.org/)
+[![Node.js](https://img.shields.io/badge/Node.Js-gray?logo=node.js)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/React-gray?logo=react&logoColor=61DAFB)](https://react.dev/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![Project Status](https://img.shields.io/badge/status-in_progress-yellow)](https://github.com/ssnofall/portal)
 
 <img src="img.png" alt="Portal Preview" width="800"/>
 
@@ -27,9 +27,9 @@ The primary goal of this project is to learn and demonstrate how to build a peer
 
 ## Tech Stack
 
-- **Frontend**: Plain HTML, CSS, and JavaScript (served from the `public` directory)
+- **Frontend**: React.js with Vite (served over HTTPS)
 - **Backend**: Node.js server to serve the app over HTTPS
-- **Signaling**: Secure WebSocket server for peer matchmaking
+- **Signaling**: Secure WebSocket server (WSS) for peer matchmaking
 
 ## Getting Started
 
@@ -45,37 +45,61 @@ The primary goal of this project is to learn and demonstrate how to build a peer
 git clone https://github.com/ssnofall/portal.git
 cd portal
 ```
-2. Install Dependecies
+2. Install Dependencies
 ```bash
-npm install
+npm install              # Install Backend dependencies
+cd client && npm install # Install React dependencies
+cd ..
 ```
 3. Create the required directories and files:
 ```bash
 mkdir certs
 touch .env
 ```
-4. Configure your '.env' file. Replace the 'HOST' value with your machine's local IP address:
-```bash
-NODE_ENV=development
-WEB_PORT=3000
-SIGNALING_PORT=3001
-HOST=192.168.1.100
-USE_SSL=true
-```
-5. Generate a self-signed certificate:
+4. Generate SSL certificates (required for HTTPS):
 ```bash
 cd certs
 openssl req -nodes -new -x509 -keyout server.key -out server.cert -days 365
 ```
 - You can press Enter for most prompts to accept the defaults.
-- For Common Name, enter your IP address (e.g., 192.168.1.100).
+- For Common Name, enter your IP address or `localhost` (e.g., `192.168.1.100` or `localhost`).
+
+5. Configure your '.env' file. Replace the 'HOST' value with your machine's local IP address:
+```bash
+NODE_ENV=development
+WEB_PORT=3000
+SIGNALING_PORT=3001
+HOST=192.168.1.100
+```
 
 ### Running the App
+
+**Development Mode:**
 ```bash
-cd ..               # If you're still in the certs folder
-npm run dev         # run https web-server
-npm run dev:signal  # run secure signaling server
+# Start the signaling server (WSS)
+npm run portal:signal
+
+# Start the express web server that serves the webpage (HTTPS)
+npm run portal:web
+
+# Start the React development server on localhost
+cd client
+npm run react:dev
 ```
+
+**Production Mode:**
+```bash
+# Build the React app
+cd client
+npm run portal:build
+cd ..
+
+# Start servers
+npm run portal:signal
+npm run portal:web
+```
+
+**Note:** HTTPS is enabled by default. Both the web server and signaling server use certificates from the `certs/` directory. The React dev server (Vite) will also use HTTPS with the same certificates.
 
 ---
 

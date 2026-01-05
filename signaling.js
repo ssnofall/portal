@@ -6,7 +6,8 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = process.env.SIGNALING_PORT || 3001;
-const USE_SSL = process.env.USE_SSL === 'true';
+// Default to HTTPS enabled, can be disabled with USE_SSL=false
+const USE_SSL = process.env.USE_SSL !== 'false';
 
 let server;
 let wss;
@@ -19,8 +20,14 @@ if (USE_SSL) {
   const certPath = path.join(__dirname, 'certs', 'server.cert');
   
   if (!fs.existsSync(keyPath) || !fs.existsSync(certPath)) {
-    console.error('SSL certificates not found. Please generate certificates in the certs/ directory.');
-    console.error('Or set USE_SSL=false in your .env file to run without SSL.');
+    console.error('ERROR: SSL certificates not found!');
+    console.error(`Expected files:`);
+    console.error(`  - ${keyPath}`);
+    console.error(`  - ${certPath}`);
+    console.error('\nTo generate certificates, run:');
+    console.error('  cd certs');
+    console.error('  openssl req -nodes -new -x509 -keyout server.key -out server.cert -days 365');
+    console.error('\nOr set USE_SSL=false in your .env file to run without SSL (not recommended).');
     process.exit(1);
   }
   
