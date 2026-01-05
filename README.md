@@ -27,9 +27,9 @@ The primary goal of this project is to learn and demonstrate how to build a peer
 
 ## Tech Stack
 
-- **Frontend**: Plain HTML, CSS, and JavaScript (served from the `public` directory)
+- **Frontend**: React.js with Vite (served over HTTPS)
 - **Backend**: Node.js server to serve the app over HTTPS
-- **Signaling**: Secure WebSocket server for peer matchmaking
+- **Signaling**: Secure WebSocket server (WSS) for peer matchmaking
 
 ## Getting Started
 
@@ -45,37 +45,68 @@ The primary goal of this project is to learn and demonstrate how to build a peer
 git clone https://github.com/ssnofall/portal.git
 cd portal
 ```
-2. Install Dependecies
+2. Install Dependencies
 ```bash
-npm install
+npm install              # Install root dependencies
+cd client && npm install # Install React dependencies
+cd ..
 ```
 3. Create the required directories and files:
 ```bash
 mkdir certs
 touch .env
 ```
-4. Configure your '.env' file. Replace the 'HOST' value with your machine's local IP address:
-```bash
-NODE_ENV=development
-WEB_PORT=3000
-SIGNALING_PORT=3001
-HOST=192.168.1.100
-USE_SSL=true
-```
-5. Generate a self-signed certificate:
+4. Generate SSL certificates (required for HTTPS):
 ```bash
 cd certs
 openssl req -nodes -new -x509 -keyout server.key -out server.cert -days 365
 ```
 - You can press Enter for most prompts to accept the defaults.
-- For Common Name, enter your IP address (e.g., 192.168.1.100).
+- For Common Name, enter your IP address or `localhost` (e.g., `192.168.1.100` or `localhost`).
+
+5. Configure your '.env' file. Replace the 'HOST' value with your machine's local IP address:
+```bash
+NODE_ENV=development
+WEB_PORT=3000
+SIGNALING_PORT=3001
+HOST=192.168.1.100
+# HTTPS is enabled by default. Set USE_SSL=false to disable (not recommended)
+```
 
 ### Running the App
+
+**Development Mode:**
 ```bash
-cd ..               # If you're still in the certs folder
-npm run dev         # run https web-server
-npm run dev:signal  # run secure signaling server
+# Terminal 1: Start the signaling server (WSS)
+npm run dev:signal
+
+# Terminal 2: Start the web server (HTTPS)
+npm run dev
+
+# Terminal 3: Start the React dev server (HTTPS)
+cd client
+npm run dev
 ```
+
+Or use the convenience script to run both servers:
+```bash
+npm run dev:all  # Runs web server and signaling server concurrently
+# Then in another terminal: cd client && npm run dev
+```
+
+**Production Mode:**
+```bash
+# Build the React app
+cd client
+npm run build
+cd ..
+
+# Start servers
+npm run dev:signal  # Terminal 1
+npm run dev         # Terminal 2
+```
+
+**Note:** HTTPS is enabled by default. Both the web server and signaling server use certificates from the `certs/` directory. The React dev server (Vite) will also use HTTPS with the same certificates.
 
 ---
 
