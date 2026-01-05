@@ -1,13 +1,12 @@
 {
-  "name": "portal",
+  "name": "portal-backend",
   "version": "1.0.0",
-  "description": "WebRTC P2P Video Chat",
-  "main": "server.js",
+  "description": "Backend for Portal P2P Video Chat",
+  "main": "signaling.js",
   "scripts": {
-    "dev": "node server.js",
-    "dev:signal": "node signaling.js",
-    "dev:all": "concurrently \"npm run dev\" \"npm run dev:signal\"",
-    "start": "node server.js"
+    "portal:web": "node server.js",
+    "portal:signal": "node signaling.js",
+    "start": "node signaling.js"
   },
   "keywords": [
     "webrtc",
@@ -24,6 +23,5 @@
     "ws": "^8.14.2"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
   }
 }

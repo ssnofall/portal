@@ -47,7 +47,7 @@ cd portal
 ```
 2. Install Dependencies
 ```bash
-npm install              # Install root dependencies
+npm install              # Install Backend dependencies
 cd client && npm install # Install React dependencies
 cd ..
 ```
@@ -70,40 +70,33 @@ NODE_ENV=development
 WEB_PORT=3000
 SIGNALING_PORT=3001
 HOST=192.168.1.100
-# HTTPS is enabled by default. Set USE_SSL=false to disable (not recommended)
 ```
 
 ### Running the App
 
 **Development Mode:**
 ```bash
-# Terminal 1: Start the signaling server (WSS)
-npm run dev:signal
+# Start the signaling server (WSS)
+npm run portal:signal
 
-# Terminal 2: Start the web server (HTTPS)
-npm run dev
+# Start the express web server that serves the webpage (HTTPS)
+npm run portal:web
 
-# Terminal 3: Start the React dev server (HTTPS)
+# Start the React development server on localhost
 cd client
-npm run dev
-```
-
-Or use the convenience script to run both servers:
-```bash
-npm run dev:all  # Runs web server and signaling server concurrently
-# Then in another terminal: cd client && npm run dev
+npm run react:dev
 ```
 
 **Production Mode:**
 ```bash
 # Build the React app
 cd client
-npm run build
+npm run portal:build
 cd ..
 
 # Start servers
-npm run dev:signal  # Terminal 1
-npm run dev         # Terminal 2
+npm run portal:signal
+npm run portal:web
 ```
 
 **Note:** HTTPS is enabled by default. Both the web server and signaling server use certificates from the `certs/` directory. The React dev server (Vite) will also use HTTPS with the same certificates.
