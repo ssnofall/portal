@@ -79,10 +79,13 @@ wss.on('connection', (ws, req) => {
         console.log(`Client registered: ${clientId} (Total: ${clients.size})`);
         break;
 
-          
-        case 'offer':
-        case 'answer':
-        case 'ice-candidate':
+      case 'offer':
+      case 'answer':
+      case 'ice-candidate':
+          if (!clientId) {
+            console.warn('Message received from unregistered client');
+            break;
+          }
           const targetClient = clients.get(data.target);
           if (targetClient && targetClient.readyState === WebSocket.OPEN) {
             targetClient.send(JSON.stringify({
@@ -102,29 +105,33 @@ wss.on('connection', (ws, req) => {
   });
   
   ws.on('close', () => {
-  if (clientId) {
-    clients.delete(clientId);
-    console.log(`Client disconnected: ${clientId} (Total: ${clients.size})`);
-  }
-});
+    if (clientId) {
+      clients.delete(clientId);
+      console.log(`Client disconnected: ${clientId} (Total: ${clients.size})`);
+    }
+  });
 });
 
-// Fallback Generate a random peer ID
+// Generate a random peer ID
 function generatePeerId(length = 10) {
-  const array = new Uint8Array(length);          // make an array of bytes
-  crypto.getRandomValues(array);                 // fill it with random numbers
+  const array = new Uint8Array(length);
+  // Use webcrypto API for secure random values
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    crypto.getRandomValues(array);
+  } else {
+    // Fallback for older Node.js versions
+    const cryptoModule = require('crypto');
+    if (cryptoModule.webcrypto && cryptoModule.webcrypto.getRandomValues) {
+      cryptoModule.webcrypto.getRandomValues(array);
+    } else {
+      // Last resort: use randomBytes and convert
+      const randomBytes = cryptoModule.randomBytes(length);
+      array.set(randomBytes);
+    }
+  }
   return 'peer_' + Array.from(array, byte => byte.toString(36).padStart(2, '0'))
                          .join('')
-                         .substring(0, length); // shorten to the length we want
-}
-
-// Auto generate new id if duplicate found
-function registerWithServer() {
-  const myId = generatePeerId(); // secure random ID
-  ws.send(JSON.stringify({
-    type: 'register',
-    clientId: myId
-  }));
+                         .substring(0, length);
 }
 
 
