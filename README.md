@@ -72,8 +72,9 @@ openssl req -nodes -new -x509 -keyout server.key -out server.cert -days 365
 
 ### Running the App
 ```bash
-cd ..  # If you're still in the certs folder
-npm run dev:all
+cd ..               # If you're still in the certs folder
+npm run dev         # run https web-server
+npm run dev:signal  # run secure signaling server
 ```
 
 ---
