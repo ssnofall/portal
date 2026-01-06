@@ -13,11 +13,19 @@ function VideoChat() {
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
   const [isCallActive, setIsCallActive] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isRemoteSpeaking, setIsRemoteSpeaking] = useState(false);
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
   const peerConnectionRef = useRef(null);
   const wsRef = useRef(null);
+  const audioContextRef = useRef(null);
+  const analyserRef = useRef(null);
+  const animationFrameRef = useRef(null);
+  const remoteAudioContextRef = useRef(null);
+  const remoteAnalyserRef = useRef(null);
+  const remoteAnimationFrameRef = useRef(null);
   const [signalingUrl, setSignalingUrl] = useState('');
 
   // Initialize peer ID and fetch config
@@ -135,6 +143,170 @@ function VideoChat() {
     if (remoteVideoRef.current && remoteStream) {
       remoteVideoRef.current.srcObject = remoteStream;
     }
+  }, [remoteStream]);
+
+  // Monitor audio levels for speaking indicator
+  useEffect(() => {
+    if (!localStream || !isAudioEnabled) {
+      // Clean up if stream is removed or audio is disabled
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+        audioContextRef.current = null;
+      }
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+      setIsSpeaking(false);
+      return;
+    }
+
+    // Get audio tracks
+    const audioTracks = localStream.getAudioTracks();
+    if (audioTracks.length === 0 || !audioTracks[0].enabled) {
+      setIsSpeaking(false);
+      return;
+    }
+
+    // Set up Web Audio API for audio level monitoring
+    try {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const analyser = audioContext.createAnalyser();
+      const microphone = audioContext.createMediaStreamSource(localStream);
+      
+      analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.8;
+      microphone.connect(analyser);
+      
+      audioContextRef.current = audioContext;
+      analyserRef.current = analyser;
+
+      // Monitor audio levels
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      const threshold = 30; // Adjust this value to change sensitivity (0-255)
+      
+      const checkAudioLevel = () => {
+        if (!analyserRef.current || !audioContextRef.current) {
+          return;
+        }
+
+        analyserRef.current.getByteFrequencyData(dataArray);
+        
+        // Calculate average volume
+        let sum = 0;
+        for (let i = 0; i < dataArray.length; i++) {
+          sum += dataArray[i];
+        }
+        const average = sum / dataArray.length;
+        
+        // Update speaking state based on threshold
+        setIsSpeaking(average > threshold);
+        
+        animationFrameRef.current = requestAnimationFrame(checkAudioLevel);
+      };
+
+      checkAudioLevel();
+    } catch (err) {
+      console.error('Error setting up audio monitoring:', err);
+    }
+
+    // Cleanup function
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close().catch(err => {
+          console.error('Error closing audio context:', err);
+        });
+        audioContextRef.current = null;
+      }
+      analyserRef.current = null;
+      setIsSpeaking(false);
+    };
+  }, [localStream, isAudioEnabled]);
+
+  // Monitor remote audio levels for speaking indicator
+  useEffect(() => {
+    if (!remoteStream) {
+      // Clean up if stream is removed
+      if (remoteAudioContextRef.current) {
+        remoteAudioContextRef.current.close();
+        remoteAudioContextRef.current = null;
+      }
+      if (remoteAnimationFrameRef.current) {
+        cancelAnimationFrame(remoteAnimationFrameRef.current);
+        remoteAnimationFrameRef.current = null;
+      }
+      setIsRemoteSpeaking(false);
+      return;
+    }
+
+    // Get audio tracks
+    const audioTracks = remoteStream.getAudioTracks();
+    if (audioTracks.length === 0 || !audioTracks[0].enabled) {
+      setIsRemoteSpeaking(false);
+      return;
+    }
+
+    // Set up Web Audio API for remote audio level monitoring
+    try {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const analyser = audioContext.createAnalyser();
+      const microphone = audioContext.createMediaStreamSource(remoteStream);
+      
+      analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.8;
+      microphone.connect(analyser);
+      
+      remoteAudioContextRef.current = audioContext;
+      remoteAnalyserRef.current = analyser;
+
+      // Monitor audio levels
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      const threshold = 30; // Adjust this value to change sensitivity (0-255)
+      
+      const checkAudioLevel = () => {
+        if (!remoteAnalyserRef.current || !remoteAudioContextRef.current) {
+          return;
+        }
+
+        remoteAnalyserRef.current.getByteFrequencyData(dataArray);
+        
+        // Calculate average volume
+        let sum = 0;
+        for (let i = 0; i < dataArray.length; i++) {
+          sum += dataArray[i];
+        }
+        const average = sum / dataArray.length;
+        
+        // Update speaking state based on threshold
+        setIsRemoteSpeaking(average > threshold);
+        
+        remoteAnimationFrameRef.current = requestAnimationFrame(checkAudioLevel);
+      };
+
+      checkAudioLevel();
+    } catch (err) {
+      console.error('Error setting up remote audio monitoring:', err);
+    }
+
+    // Cleanup function
+    return () => {
+      if (remoteAnimationFrameRef.current) {
+        cancelAnimationFrame(remoteAnimationFrameRef.current);
+        remoteAnimationFrameRef.current = null;
+      }
+      if (remoteAudioContextRef.current) {
+        remoteAudioContextRef.current.close().catch(err => {
+          console.error('Error closing remote audio context:', err);
+        });
+        remoteAudioContextRef.current = null;
+      }
+      remoteAnalyserRef.current = null;
+      setIsRemoteSpeaking(false);
+    };
   }, [remoteStream]);
 
   const handleCall = async () => {
@@ -305,7 +477,7 @@ function VideoChat() {
             autoPlay
             muted
             playsInline
-            className="video-element"
+            className={`video-element ${isSpeaking ? 'speaking' : ''}`}
           />
         </div>
 
@@ -315,7 +487,7 @@ function VideoChat() {
             ref={remoteVideoRef}
             autoPlay
             playsInline
-            className="video-element"
+            className={`video-element ${isRemoteSpeaking ? 'speaking' : ''}`}
           />
           {!remoteStream && (
             <div className="no-video-placeholder">Waiting for connection...</div>

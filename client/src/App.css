@@ -137,7 +137,8 @@
 
 .video-element.speaking {
   outline: 4px solid #4caf50;
-  outline-offset: 4px;
+  outline-offset: 0px;
+  transition: outline 0.1s ease;
 }
 
 
