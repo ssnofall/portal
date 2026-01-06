@@ -10,6 +10,9 @@ function VideoChat() {
   const [remoteStream, setRemoteStream] = useState(null);
   const [incomingCall, setIncomingCall] = useState(null);
   const [peerIdInput, setPeerIdInput] = useState('');
+  const [isAudioEnabled, setIsAudioEnabled] = useState(true);
+  const [isVideoEnabled, setIsVideoEnabled] = useState(true);
+  const [isCallActive, setIsCallActive] = useState(false);
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
@@ -57,6 +60,8 @@ function VideoChat() {
         if (localVideoRef.current) {
           localVideoRef.current.srcObject = stream;
         }
+        setIsAudioEnabled(true);
+        setIsVideoEnabled(true);
         setStatus('Camera and microphone active');
       } catch (err) {
         console.error('Error accessing media:', err);
@@ -81,15 +86,29 @@ function VideoChat() {
         if (remoteVideoRef.current) {
           remoteVideoRef.current.srcObject = stream;
         }
+        setIsCallActive(true);
       },
       onConnectionStateChange: (state) => {
         console.log('Connection state:', state);
+        if (state === 'disconnected' || state === 'failed' || state === 'closed') {
+          setIsCallActive(false);
+          setRemoteStream(null);
+          if (remoteVideoRef.current) {
+            remoteVideoRef.current.srcObject = null;
+          }
+          if (state === 'failed') {
+            setStatus('Connection failed');
+          } else if (state === 'disconnected' || state === 'closed') {
+            setStatus('Call ended');
+          }
+        }
       },
       onIncomingCall: (peerId, handleAccept) => {
         setIncomingCall({ peerId, handleAccept });
       },
       onCallDeclined: (peerId) => {
         alert(`Your call to ${peerId} was declined`);
+        setIsCallActive(false);
       }
     };
 
@@ -142,15 +161,33 @@ function VideoChat() {
         if (remoteVideoRef.current) {
           remoteVideoRef.current.srcObject = stream;
         }
+        setIsCallActive(true);
       },
       onConnectionStateChange: (state) => {
         console.log('Connection state:', state);
+        if (state === 'disconnected' || state === 'failed' || state === 'closed') {
+          setIsCallActive(false);
+          setRemoteStream(null);
+          if (remoteVideoRef.current) {
+            remoteVideoRef.current.srcObject = null;
+          }
+          if (state === 'failed') {
+            setStatus('Connection failed');
+          } else if (state === 'disconnected' || state === 'closed') {
+            setStatus('Call ended');
+          }
+        }
       },
       onIncomingCall: () => {},
-      onCallDeclined: () => {}
+      onCallDeclined: (peerId) => {
+        alert(`Your call to ${peerId} was declined`);
+        setIsCallActive(false);
+        setStatus('Call declined');
+      }
     };
 
     makeCall(peerId, localStream, wsRef.current, peerConnectionRef, callbacks);
+    // Don't set isCallActive here - wait for actual connection
   };
 
   const handleAcceptCall = () => {
@@ -165,6 +202,56 @@ function VideoChat() {
       incomingCall.handleAccept(false);
       setIncomingCall(null);
     }
+  };
+
+  const toggleAudio = () => {
+    if (localStream) {
+      const audioTracks = localStream.getAudioTracks();
+      if (audioTracks.length > 0) {
+        const newState = !audioTracks[0].enabled;
+        audioTracks.forEach(track => {
+          track.enabled = newState;
+        });
+        setIsAudioEnabled(newState);
+      }
+    }
+  };
+
+  const toggleVideo = () => {
+    if (localStream) {
+      const videoTracks = localStream.getVideoTracks();
+      if (videoTracks.length > 0) {
+        const newState = !videoTracks[0].enabled;
+        videoTracks.forEach(track => {
+          track.enabled = newState;
+        });
+        setIsVideoEnabled(newState);
+      }
+    }
+  };
+
+  const handleHangUp = () => {
+    // Close peer connection
+    if (peerConnectionRef.current) {
+      try {
+        peerConnectionRef.current.close();
+      } catch (err) {
+        console.error('Error closing peer connection:', err);
+      }
+      peerConnectionRef.current = null;
+    }
+
+    // Clear remote stream
+    setRemoteStream(null);
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = null;
+    }
+
+    // Reset call state
+    setIsCallActive(false);
+    setStatus('Call ended');
+    
+    // Note: We keep the local stream active so user can make another call
   };
 
   return (
@@ -235,6 +322,33 @@ function VideoChat() {
           )}
         </div>
       </div>
+
+      {/* Call Control Buttons */}
+      {isCallActive && (
+        <div className="call-action-buttons">
+          <button
+            onClick={toggleAudio}
+            className={`control-btn audio-btn ${isAudioEnabled ? 'enabled' : 'disabled'}`}
+            title={isAudioEnabled ? 'Mute audio' : 'Unmute audio'}
+          >
+            <span>{isAudioEnabled ? 'Mute' : 'Unmute'}</span>
+          </button>
+          <button
+            onClick={toggleVideo}
+            className={`control-btn video-btn ${isVideoEnabled ? 'enabled' : 'disabled'}`}
+            title={isVideoEnabled ? 'Turn off video' : 'Turn on video'}
+          >
+            <span>{isVideoEnabled ? 'Turn Off Video' : 'Turn On Video'}</span>
+          </button>
+          <button
+            onClick={handleHangUp}
+            className="control-btn hangup-btn"
+            title="End call"
+          >
+            <span>Hang Up</span>
+          </button>
+        </div>
+      )}
 
       {/* Status Display */}
       <div className="status">{status}</div>

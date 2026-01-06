@@ -233,6 +233,81 @@
   background-color: #da190b;
 }
 
+.call-action-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 1.5rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 0px;
+  width: 100%;
+  max-width: 600px;
+}
+
+.control-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  border-radius: 0px;
+  border: 2px solid transparent;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.87);
+  font-size: 1rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.25s;
+  min-width: 100px;
+}
+
+.control-btn:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.control-btn:active {
+  transform: translateY(0);
+}
+
+.control-btn span {
+  font-size: 0.9rem;
+  font-weight: 400;
+}
+
+.control-btn.audio-btn.enabled {
+  border-color: #4caf50;
+}
+
+.control-btn.audio-btn.disabled {
+  border-color: #f44336;
+  background-color: rgba(244, 67, 54, 0.1);
+}
+
+.control-btn.video-btn.enabled {
+  border-color: #00b7ff;
+}
+
+.control-btn.video-btn.disabled {
+  border-color: #ff9800;
+  background-color: rgba(255, 152, 0, 0.1);
+}
+
+.control-btn.hangup-btn {
+  background-color: #f44336;
+  border-color: #f44336;
+  color: white;
+}
+
+.control-btn.hangup-btn:hover {
+  background-color: #da190b;
+  border-color: #da190b;
+}
+
 @media (max-width: 768px) {
   .videos {
     grid-template-columns: 1fr;
@@ -249,5 +324,14 @@
   .call-controls input,
   .call-controls button {
     width: 100%;
+  }
+
+  .call-action-buttons {
+    flex-direction: column;
+  }
+
+  .control-btn {
+    width: 100%;
+    max-width: 300px;
   }
 }

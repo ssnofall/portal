@@ -42,12 +42,27 @@ export function createPeerConnection(peerId, localStream, ws, callbacks) {
 
   // ICE candidates
   peerConnection.onicecandidate = (event) => {
-    if (event.candidate && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({
-        type: 'ice-candidate',
-        target: peerId,
-        data: event.candidate
-      }));
+    if (event.candidate && ws && ws.readyState === WebSocket.OPEN) {
+      try {
+        ws.send(JSON.stringify({
+          type: 'ice-candidate',
+          target: peerId,
+          data: event.candidate
+        }));
+      } catch (err) {
+        console.error('Error sending ICE candidate:', err);
+      }
+    } else if (!event.candidate) {
+      console.log('ICE gathering complete');
+    }
+  };
+
+  // ICE connection state changes
+  peerConnection.oniceconnectionstatechange = () => {
+    const iceState = peerConnection.iceConnectionState;
+    console.log('ICE connection state:', iceState);
+    if (iceState === 'failed' || iceState === 'disconnected') {
+      console.warn('ICE connection issue:', iceState);
     }
   };
 
@@ -56,10 +71,10 @@ export function createPeerConnection(peerId, localStream, ws, callbacks) {
     const state = peerConnection.connectionState;
     console.log('Connection state:', state);
     onConnectionStateChange(state);
-    onStatusChange(`Connection state: ${state}`);
     
     // When connected, ensure remote video is set
     if (state === 'connected' || state === 'completed') {
+      onStatusChange('✓ Connected! Video call active');
       setTimeout(() => {
         // Check receivers for tracks
         const receivers = peerConnection.getReceivers();
@@ -72,9 +87,11 @@ export function createPeerConnection(peerId, localStream, ws, callbacks) {
           const stream = new MediaStream(tracks);
           console.log('Set remote video from receivers on connection:', tracks.length, 'tracks');
           onRemoteStream(stream);
-          onStatusChange('✓ Connected! Video call active');
         }
       }, 200);
+    } else if (state === 'disconnected' || state === 'failed' || state === 'closed') {
+      // Don't set status here - let the component handle it
+      console.log('Connection ended:', state);
     }
   };
 

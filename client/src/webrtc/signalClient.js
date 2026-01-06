@@ -20,7 +20,7 @@ export function setupWebSocket(myId, SIGNALING_URL, localStream, peerConnectionR
         await handleAnswer(data.data, peerConnectionRef.current, callbacks);
         break;
       case 'ice-candidate':
-        await handleIceCandidate(data.data, peerConnectionRef.current);
+        await handleIceCandidate(data.data, peerConnectionRef.current, data.from);
         break;
       case 'call-declined':
         onCallDeclined(data.from);
@@ -36,8 +36,17 @@ export function setupWebSocket(myId, SIGNALING_URL, localStream, peerConnectionR
     }
   };
 
-  ws.onerror = () => onStatusChange('WebSocket error');
-  ws.onclose = () => onStatusChange('Disconnected from server');
+  ws.onerror = (error) => {
+    console.error('WebSocket error:', error);
+    onStatusChange('WebSocket error');
+  };
+  
+  ws.onclose = (event) => {
+    console.log('WebSocket closed:', event.code, event.reason);
+    if (event.code !== 1000) {
+      onStatusChange('Disconnected from server');
+    }
+  };
 
   return ws;
 }
